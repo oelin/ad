@@ -68,3 +68,5 @@ z.backward()
 x.grad # [[0., 1., 1.]]
 y.grad # [[1.], [2.], [3.]]
 ```
+
+Other operations such as activation functions and neural network layers can be implemented using the same API. The only requirement is that `forward()` takes in some number of `Tensor` instances and returns a new `Tensor` instance. Meanwhile, `backward()` should take in the same number of tensors as `forward()`, and additionally take in a `grad` argument for the parent gradient. It should call `backward()` on the child tensors if it wishes to update their gradients as well (i.e. back propagation).
