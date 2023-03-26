@@ -1,7 +1,9 @@
 from dataclasses import dataclass 
 
+
 @dataclass
 class Variable:
+
     data: np.array
     grad: np.array
     requires_grad: bool = False 
@@ -12,6 +14,7 @@ class Variable:
         self.back and self.back()
         self.grad *= self.requires_grad
 
+        
 @dataclass
 class Function:
     def __call__(self, *variables) -> Variable:
