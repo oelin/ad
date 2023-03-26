@@ -6,6 +6,7 @@ Automatic differentiation in 15 lines of code. Here's the code:
 ```py
 from dataclasses import dataclass 
 
+
 @dataclass
 class Variable:
 
@@ -18,6 +19,7 @@ class Variable:
         self.grad += grad 
         self.back and self.back()
         self.grad *= self.requires_grad
+
 
 class Function:
     def __call__(self, *variables) -> Variable:
