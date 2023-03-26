@@ -14,8 +14,7 @@ class Variable:
         self.back and self.back()
         self.grad *= self.requires_grad
 
-        
-@dataclass
+
 class Function:
     def __call__(self, *variables) -> Variable:
         result = self.forward(*variables)
