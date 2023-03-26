@@ -39,21 +39,28 @@ class Function:
 This tiny library can be used to implement a complete automatic differentiation engine. For instance, the tensor dot product operation can be implemented as follows:
 
 ```py
-# To reduce boilerplate when creating tensors.
+# To reduce boilerplate when creating variables.
 
-tensor = lambda data: Tensor(data=data, grad=np.zeros_like(data), back=None)
+def variable(data, requires_grad=False, back=None):
+
+    return Variable(
+        np.array(data).astype(float),
+        np.zeros_like(np.array(data)).astype(float),
+        requires_grad,
+        back
+    )
 ```
 
 ```py
 class TensorDotProduct(Function):
 
-    def forward(self, x: Tensor, y: Tensor) -> Tensor:
-        return tensor(x.data @ y.data)
+    def forward(self, x: Variable, y: Variable) -> Variable:
+        return variable(x.data @ y.data)
     
-    def backward(self, x: Tensor, y: Tensor, grad) -> None:
+    def backward(self, x: Variable, y: Variable, grad) -> None:
     
-        x.backward(x.data.T @ grad) # Backpropagate to children.
-        y.backward(grad @ y.data.T)
+        x.grad += x.data.T @ grad # Backpropagate to children.
+        y.grad += grad @ y.data.T
 ```
 
 To make code more concise, we can overload the `@` operator:
@@ -75,4 +82,4 @@ x.grad # [[0., 1., 1.]]
 y.grad # [[1.], [2.], [3.]]
 ```
 
-Other operations such as activation functions and neural network layers can be implemented using the same API. The only requirement is that `forward()` takes in some number of `Tensor` instances and returns a new `Tensor` instance. Meanwhile, `backward()` should take in the same number of tensors as `forward()`, and additionally take in a `grad` argument for the parent gradient. It should call `backward()` on the child tensors if it wishes to update their gradients as well (i.e. back propagation).
+Other operations such as activation functions and neural network layers can be implemented using the same API. The only requirement is that `forward()` takes in some number of `Variable` instances and returns a new `Variable` instance. Meanwhile, `backward()` should take in the same number of tensors as `forward()`, and additionally take in a `grad` argument for the parent gradient. 
