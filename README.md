@@ -4,27 +4,33 @@ Automatic differentiation in 15 lines of code. Here's the code:
 
 
 ```py
-from typing import Any, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass 
 
 @dataclass
-class Tensor:
-    data: Any
-    grad: Any
-    back: Callable
+class Variable:
 
-    def backward(self, grad = 1.):
-        self.grad += grad
-        self.backward = int
+    data: np.array
+    grad: np.array
+    requires_grad: bool = False 
+    back: callable = None
+    
+    def backward(self, grad = 1.) -> None:
+        self.grad += grad 
         self.back and self.back()
+        self.grad *= self.requires_grad
 
 class Function:
-    def __call__(self, *tensors):
-        
-        tensor = self.forward(*tensors)
-        tensor.back = lambda: self.backward(*tensors, tensor.grad)
+    def __call__(self, *variables) -> Variable:
+        result = self.forward(*variables)
 
-        return tensor
+        def back():
+            self.backward(*variables, result.grad)
+
+            for variable in variables:
+                variable.backward(0.)
+        
+        result.back = back 
+        return result
 ```
 
 
