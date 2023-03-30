@@ -1,6 +1,6 @@
 # ad
 
-Automatic differentiation in 15 lines of code. Here's the code:
+Automatic differentiation in 20 lines of code. Here's the code:
 
 
 ```py
