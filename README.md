@@ -4,34 +4,29 @@ Automatic differentiation in 20 lines of code. Here's the code:
 
 
 ```py
-from dataclasses import dataclass 
 
-
-@dataclass
 class Variable:
-
-    data: np.array
-    grad: np.array
-    requires_grad: bool = False 
-    back: callable = None
-    
-    def backward(self, grad = 1.) -> None:
-        self.grad += grad 
-        self.back and self.back()
-        self.grad *= self.requires_grad
+    def __init__(self, data, terminal=False):
+        
+        self.data = np.array(data)                        # x.
+        self.grad = np.zeros_like(self.data)              # dL/dx.
+        self.terminal = terminal
+        self.backward = int 
 
 
 class Function:
-    def __call__(self, *variables) -> Variable:
-        result = self.forward(*variables)
-
-        def back():
-            self.backward(*variables, result.grad)
-
-            for variable in variables:
-                variable.backward(0.)
+    def __call__(self, *variables):
+        result = self.forward(*variables)                 # Forward pass, f(x0, ..., xn).
         
-        result.back = back 
+        def backward(grad = 1):                           # Backward pass.
+            self.backward(*variables, grad + result.grad) # Accumulate gradients, dL/dxi += dL/df * df/dxi.
+
+            for variable in variables:                    # Recurse.
+                variable.backward(0)
+                
+            result.grad *= result.terminal                # Reset gradients.
+        result.backward = backward 
+        
         return result
 ```
 
@@ -41,23 +36,10 @@ class Function:
 This tiny library can be used to implement a complete automatic differentiation engine. For instance, the tensor dot product operation can be implemented as follows:
 
 ```py
-# To reduce boilerplate when creating variables.
-
-def variable(data, requires_grad=False, back=None):
-
-    return Variable(
-        np.array(data).astype(float),
-        np.zeros_like(np.array(data)).astype(float),
-        requires_grad,
-        back
-    )
-```
-
-```py
 class TensorDotProduct(Function):
 
     def forward(self, x: Variable, y: Variable) -> Variable:
-        return variable(x.data @ y.data)
+        return Variable(x.data @ y.data)
     
     def backward(self, x: Variable, y: Variable, grad) -> None:
     
