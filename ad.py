@@ -1,29 +1,23 @@
-from dataclasses import dataclass 
-
-
-@dataclass
 class Variable:
-
-    data: np.array
-    grad: np.array
-    requires_grad: bool = False 
-    back: callable = None
-    
-    def backward(self, grad = 1.) -> None:
-        self.grad += grad 
-        self.back and self.back()
-        self.grad *= self.requires_grad
+    def __init__(self, data, terminal=False):
+        
+        self.data = np.array(data)
+        self.grad = np.zeros_like(self.data)
+        self.terminal = terminal
+        self.backward = int 
 
 
 class Function:
-    def __call__(self, *variables) -> Variable:
+    def __call__(self, *variables):
         result = self.forward(*variables)
-
-        def back():
-            self.backward(*variables, result.grad)
+        
+        def backward(grad = 1):
+            self.backward(*variables, grad + result.grad)
 
             for variable in variables:
-                variable.backward(0.)
+                variable.backward(0)
+                
+            result.grad *= result.terminal
+        result.backward = backward 
         
-        result.back = back 
         return result
