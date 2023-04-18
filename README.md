@@ -1,9 +1,7 @@
 # ad
 
-Automatic differentiation in 20 lines of code. Here's the code:
-
-
 ```py
+# Automatic differentiation in 16 lines of code.
 
 class Variable:
     def __init__(self, data, terminal=False):
